@@ -12,14 +12,26 @@
 <script type="text/javascript">
 
 	var claim1 = {doctor:'Dr. Kenneth Zwieg', 
-	dateSent:new Date(2012, 1, 14), isProcessed : true}
+	dateSent:new Date(2012, 1, 14), isProcessed : true};
 	
-	var claims = [claim1];
+	var claim2 = {doctor:'Dr. Dr. Bob Dole', 
+	dateSent:new Date(2012, 1, 14), isProcessed : false};
+	
+	var claim3 = {doctor:'Dr. Jack Kervorkian', 
+	dateSent:new Date(2012, 1, 14), isProcessed : true};
+	
+	var claim4 = {doctor:'Dr. Curl Man', 
+	dateSent:new Date(2012, 1, 14), isProcessed : false};
+	
+	var claim5 = {doctor:'Dr. House', 
+	dateSent:new Date(2012, 1, 14), isProcessed : false};
+	
+	var claims = [claim1,claim2,claim3,claim4,claim5];
 	
 	$(document).ready(function(e) {
         $.each(claims, function(i, claim)
 	{
-		$('#tbClaimsData').append('<div data-role="collapsible" data-content-theme="c"><h3>' + claim.doctor + '</h3><span>Date Recieved:' + $.format.date(claim.dateSent, 'MM/dd/yyyy') + '</span></div>');		
+		$('#tbClaimsData').append('<div data-role="collapsible" data-content-theme="c"><h3><img src="jquery-mobile/images/' + (claim.isProcessed ? "GreenBall.png" : "BlueBall.png") + '" style="vertical-align: bottom;"/>&nbsp;' + claim.doctor + '</h3><span>Date Recieved:' + $.format.date(claim.dateSent, 'MM/dd/yyyy') + '</span></div>');		
     });
 	
 	$('div[data-role=collapsible]').collapsible();
@@ -30,8 +42,8 @@
 <body>
 
 <div data-role="page" id="claims">
-	<div data-role="header">
-		<h1>Claims Information</h1>
+	<div data-role="header" data-id="MyBenefitsHeader" data-position="fixed">
+		<h1>My Benefits</h1>
     </div>
 	<div data-role="content">
     Type of Claim:
