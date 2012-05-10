@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>jQuery Mobile Web App</title>
+<title>NRECA My Benefits</title>
 <link href="jquery-mobile/jquery.mobile-1.0.min.css" rel="stylesheet" type="text/css"/>
 <script src="jquery-mobile/jquery-1.6.4.min.js" type="text/javascript"></script>
 <script src="jquery-mobile/jquery.mobile-1.0.min.js" type="text/javascript"></script>
@@ -13,21 +13,29 @@
 <div data-role="page" id="page">
 	<div data-role="header">
 		<h1>My Benefits</h1>
+
 	</div>
-	<div data-role="content">	
-		<ul data-role="listview">
-			<li><a href="#page2">401(k) Account Balance</a></li>
-            <li><a href="#page3">Medical Claims</a></li>
-	</ul>		
-	</div>
-	<div data-role="footer">
-		<h4></h4>
+    <div data-role="content">
+    401k page goes here.
+    <br/>
+    <br/>
+    </div>
+	<div data-role="footer" data-id="benefitsnav" data-position="fixed">
+<div data-role="navbar" class="ui-navbar ui-navbar-noicons" role="navigation">
+			<ul>
+				<li><a href="index.html"><span class="ui-btn-inner"><span class="ui-btn-text">401(k)</span></span></a></li>
+				<li ><a href="claims.html"><span class="ui-btn-inner"><span class="ui-btn-text">Claims</span></span></a></li>
+				<li ><a href="insurancecard.html"><span class="ui-btn-inner"><span class="ui-btn-text">Ins. Card</span></span></a></li>
+				<li ><a href="fsa125.html"><span class="ui-btn-inner"><span class="ui-btn-text">FSA/125</span></span></a></li>                
+			</ul>
+		</div>        
+	</div>		
 	</div>
 </div>
 
 <div data-role="page" id="page2">
 	<div data-role="header">
-		<h1>401(k) Account Balance</h1>
+		<h1>401(k) Balance</h1>
 	</div>
 	<div data-role="content">	
 		Content		
