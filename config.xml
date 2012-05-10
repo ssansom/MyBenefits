@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<widget xmlns = "http://www.w3.org/ns/widgets"
+    xmlns:gap = "http://phonegap.com/ns/1.0"
+    id        = "com.nreca.ruralbenefits"
+    version   = "1.0.0">
+
+<name>Rural Benefits</name>
+
+<description>
+A Prototype for NRECA's Mobile Benefits Application.
+</description>
+
+<author href="https://example.com" email="you@example.com">
+Shawn Sansom, Tyrone Brimm
+</author>
+
+</widget>
