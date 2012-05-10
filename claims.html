@@ -8,27 +8,23 @@
 <script src="jquery-mobile/jquery.mobile-1.0.min.js" type="text/javascript"></script>
 <script src="/phonegap.js" type="text/javascript"></script>
 </head> 
-<body> 
+<body>
 
-<div data-role="page" id="401k">
+<div data-role="page" id="claims">
 	<div data-role="header">
 		<h1>My Benefits</h1>
     </div>
-    <div data-role="content">
-    401k page goes here.
-    <br/>
-    <br/>
-    </div>
+	
 	<div data-role="footer" data-id="benefitsnav" data-position="fixed">
 		<div data-role="navbar">
 			<ul>
-				<li><a href="index.html" class="ui-btn-active ui-state-persist">401(k)</a></li>
-				<li><a href="claims.html">Claims</a></li>
-				<li><a href="insurancecard.html">Ins. Card</a></li>
-				<li><a href="fsa125.html">FSA/125</a></li>
-            </ul>
+				<li><a href="index.html" data-prefetch="true">401(k)</a></li>
+				<li><a href="claims.html" data-prefetch="true" class="ui-btn-active ui-state-persist">Claims</a></li>
+				<li><a href="insurancecard.html" data-prefetch="true">Ins. Card</a></li>
+				<li><a href="fsa125.html" data-prefetch="true">FSA/125</a></li>
+			</ul>
 		</div>        	
-	</div>
+	</div>	
 </div>
 
 </body>
