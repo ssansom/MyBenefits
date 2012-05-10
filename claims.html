@@ -7,15 +7,61 @@
 <script src="jquery-mobile/jquery-1.6.4.min.js" type="text/javascript"></script>
 <script src="jquery-mobile/jquery.mobile-1.0.min.js" type="text/javascript"></script>
 <script src="/phonegap.js" type="text/javascript"></script>
+<script src="jquery-mobile/jquery.dateFormat-1.0.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+	var claim1 = {doctor:'Dr. Kenneth Zwieg', 
+	dateSent:new Date(2012, 1, 14), isProcessed : true}
+	
+	var claims = [claim1];
+	
+	$(document).ready(function(e) {
+        $.each(claims, function(i, claim)
+	{
+		$('#tbClaimsData').append('<div data-role="collapsible" data-content-theme="c"><h3>' + claim.doctor + '</h3><span>Date Recieved:' + $.format.date(claim.dateSent, 'MM/dd/yyyy') + '</span></div>');		
+    });
+	
+	$('div[data-role=collapsible]').collapsible();
+	
+	});		
+</script>
 </head> 
 <body>
 
 <div data-role="page" id="claims">
 	<div data-role="header">
-		<h1>My Benefits</h1>
+		<h1>Claims Information</h1>
     </div>
 	<div data-role="content">
-    claims content goes here.
+    Type of Claim:
+    <fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
+    <input type="radio" name="radio-a" id="radio-choice-1" value="choice-1" checked="checked" />
+         	<label for="radio-choice-1">Medical</label>
+
+         	<input type="radio" name="radio-a" id="radio-choice-2" value="choice-2"  />
+         	<label for="radio-choice-2">Dental</label>
+
+         	<input type="radio" name="radio-a" id="radio-choice-3" value="choice-3"  />
+         	<label for="radio-choice-3">LTD</label>
+
+         	<input type="radio" name="radio-a" id="radio-choice-4" value="choice-4"  />
+         	<label for="radio-choice-4">Vision</label>
+    </fieldset>
+    Claim Status:
+    <fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
+    <input type="radio" name="radio-b" id="radio-choice-4" value="choice-1" checked="checked" />
+         	<label for="radio-choice-4">All</label>
+
+         	<input type="radio" name="radio-b" id="radio-choice-5" value="choice-2"  />
+         	<label for="radio-choice-5">Processed</label>
+
+         	<input type="radio" name="radio-b" id="radio-choice-6" value="choice-6"  />
+         	<label for="radio-choice-6">Pending</label>
+    </fieldset>
+    
+    <div id="tbClaimsData">
+    </div>
+    
     <br/>
     </div>
 	<div data-role="footer" data-id="benefitsnav" data-position="fixed">
