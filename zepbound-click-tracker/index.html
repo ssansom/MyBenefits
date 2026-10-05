@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5b3fd1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Pen Click Tracker</title>
+<style>
+  :root {
+    --bg: #f5f4f9;
+    --card: #ffffff;
+    --text: #1d1b26;
+    --muted: #6b6880;
+    --border: #e3e1ec;
+    --accent: #5b3fd1;
+    --accent-soft: #ece8fb;
+    --ok: #1d7a4a;
+    --ok-soft: #e2f4ea;
+    --warn: #9a5b00;
+    --warn-soft: #fdf0db;
+    --danger: #b3261e;
+    --danger-soft: #fbe5e3;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #13121a;
+      --card: #1e1c28;
+      --text: #ecebf3;
+      --muted: #a09db3;
+      --border: #2f2c3d;
+      --accent: #9c86ff;
+      --accent-soft: #2b2547;
+      --ok: #6fd3a0;
+      --ok-soft: #173426;
+      --warn: #f2b45a;
+      --warn-soft: #3a2a12;
+      --danger: #ff8a80;
+      --danger-soft: #3d1a18;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #13121a;
+    --card: #1e1c28;
+    --text: #ecebf3;
+    --muted: #a09db3;
+    --border: #2f2c3d;
+    --accent: #9c86ff;
+    --accent-soft: #2b2547;
+    --ok: #6fd3a0;
+    --ok-soft: #173426;
+    --warn: #f2b45a;
+    --warn-soft: #3a2a12;
+    --danger: #ff8a80;
+    --danger-soft: #3d1a18;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 16px 16px 48px; }
+  header h1 { font-size: 1.4rem; margin: 8px 0 2px; }
+  header p { margin: 0 0 16px; color: var(--muted); font-size: .9rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card h2 { font-size: 1.05rem; margin: 0 0 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .muted { color: var(--muted); }
+  .small { font-size: .85rem; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .stat { background: var(--accent-soft); border-radius: 10px; padding: 10px; text-align: center; }
+  .stat b { display: block; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: .75rem; color: var(--muted); }
+  .bar { height: 10px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--accent); border-radius: 99px; transition: width .3s; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+  .row > * { flex: 1 1 140px; }
+  label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+  input, select, textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 14px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  button.secondary { background: var(--accent-soft); color: var(--accent); }
+  button.ghost { background: transparent; color: var(--muted); padding: 6px 8px; font-weight: 500; }
+  button.danger { background: var(--danger-soft); color: var(--danger); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .dial {
+    margin: 12px 0;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    text-align: center;
+  }
+  .dial b { font-size: 2rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .dial.bad { background: var(--danger-soft); }
+  .dial.bad b { color: var(--danger); }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 9px 6px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+  td.num, th.num { text-align: right; }
+  tr.current td { background: var(--accent-soft); }
+  tr.current td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  .badge { display: inline-block; font-size: .75rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .badge.danger { background: var(--danger-soft); color: var(--danger); }
+  .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  .tabs button { flex: 1; padding: 8px; }
+  .tabs button[aria-pressed="false"] { background: var(--accent-soft); color: var(--accent); }
+  ul.log { list-style: none; padding: 0; margin: 0; }
+  ul.log li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  ul.log li:last-child { border-bottom: 0; }
+  details summary { cursor: pointer; font-weight: 600; }
+  .note { font-size: .8rem; color: var(--muted); margin-top: 8px; }
+  .disclaimer { font-size: .78rem; color: var(--muted); border-left: 3px solid var(--warn); padding-left: 10px; }
+  .scroll-x { overflow-x: auto; }
+  .hidden { display: none !important; }
+  @media (max-width: 420px) {
+    .stat b { font-size: 1.1rem; }
+    th, td { padding: 8px 4px; font-size: .9rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Pen Click Tracker</h1>
+    <p>Track click-counted doses from a multi-dose pen and see how many doses each step leaves you.</p>
+  </header>
+
+  <!-- Current pen -->
+  <section class="card" id="penCard">
+    <h2>
+      <span id="penTitle">Current pen</span>
+      <button class="secondary" id="newPenBtn" type="button">New pen</button>
+    </h2>
+    <div class="stats">
+      <div class="stat"><b id="remainingMg">–</b><span>mg left</span></div>
+      <div class="stat"><b id="remainingClicks">–</b><span>clicks left</span></div>
+      <div class="stat"><b id="dosesTaken">–</b><span>doses logged</span></div>
+    </div>
+    <div class="bar" aria-hidden="true"><div id="penBar" style="width:100%"></div></div>
+    <p class="small muted" id="penMeta" style="margin:8px 0 0"></p>
+  </section>
+
+  <!-- Log a dose -->
+  <section class="card">
+    <h2>Log a dose</h2>
+    <div class="row">
+      <div>
+        <label for="doseSelect">Dose</label>
+        <select id="doseSelect"></select>
+      </div>
+      <div id="customClicksWrap" class="hidden">
+        <label for="customClicks">Clicks</label>
+        <input id="customClicks" type="number" min="1" step="1" inputmode="numeric" value="10">
+      </div>
+      <div>
+        <label for="doseDate">Date</label>
+        <input id="doseDate" type="date">
+      </div>
+    </div>
+    <div class="dial" id="dialBox">
+      <div class="small muted">Dial</div>
+      <b id="dialClicks">–</b>
+      <div class="small" id="dialDetail"></div>
+    </div>
+    <label for="doseNote">Note (optional)</label>
+    <input id="doseNote" type="text" placeholder="e.g. left thigh, mild nausea">
+    <div style="margin-top:12px">
+      <button id="logBtn" type="button" style="width:100%">Log dose</button>
+    </div>
+  </section>
+
+  <!-- Doses remaining by step -->
+  <section class="card">
+    <h2>Doses left by dose step</h2>
+    <div class="tabs" role="group" aria-label="Pen to calculate for">
+      <button type="button" id="tabCurrent" aria-pressed="true">This pen</button>
+      <button type="button" id="tabFresh" aria-pressed="false">A fresh pen</button>
+    </div>
+    <div class="scroll-x">
+      <table>
+        <thead>
+          <tr>
+            <th>Dose</th>
+            <th class="num">Clicks</th>
+            <th class="num">Doses left</th>
+            <th>Leftover</th>
+          </tr>
+        </thead>
+        <tbody id="stepTable"></tbody>
+      </table>
+    </div>
+    <p class="note" id="stepNote"></p>
+  </section>
+
+  <!-- History -->
+  <section class="card">
+    <h2>Dose history <span class="small muted" id="nextDue"></span></h2>
+    <ul class="log" id="logList"></ul>
+    <p class="muted small" id="logEmpty">No doses logged on this pen yet.</p>
+    <details id="pastPens" class="hidden" style="margin-top:12px">
+      <summary>Previous pens</summary>
+      <div id="pastPensList"></div>
+    </details>
+  </section>
+
+  <!-- Settings -->
+  <section class="card">
+    <details>
+      <summary>Pen settings</summary>
+      <div style="margin-top:12px" class="row">
+        <div>
+          <label for="setStrength">Pen strength (mg per full dose)</label>
+          <select id="setStrength"></select>
+        </div>
+        <div>
+          <label for="setClicksPerDose">Clicks per full dose</label>
+          <input id="setClicksPerDose" type="number" min="1" step="1" inputmode="numeric">
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div>
+          <label for="setDosesPerPen">Full doses per pen</label>
+          <input id="setDosesPerPen" type="number" min="1" step="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="setExtraClicks">Extra clicks in pen (overfill)</label>
+          <input id="setExtraClicks" type="number" min="0" step="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="setPrimeClicks">Priming clicks per injection</label>
+          <input id="setPrimeClicks" type="number" min="0" step="1" inputmode="numeric">
+        </div>
+      </div>
+      <p class="note">
+        Defaults assume a 4-dose KwikPen where one full labeled dose is 60 clicks
+        (so a 15&nbsp;mg pen = 0.25&nbsp;mg per click, 240 clicks total).
+        If you prime before each injection, enter those clicks so they're subtracted too.
+        "Extra clicks" lets you count any overfill you've confirmed for your pen; leave it at 0 to be conservative.
+        Strength changes apply to the current pen; click settings apply to all calculations.
+      </p>
+      <hr style="border:0;border-top:1px solid var(--border);margin:14px 0">
+      <div class="row">
+        <button class="secondary" type="button" id="exportBtn">Export backup</button>
+        <button class="secondary" type="button" id="importBtn">Import backup</button>
+        <button class="danger" type="button" id="resetBtn">Erase all data</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json" class="hidden">
+      <p class="note">Data is saved only in this browser on this device.</p>
+    </details>
+  </section>
+
+  <p class="disclaimer">
+    Click counting to take partial doses is not part of the manufacturer's instructions, and clicks per dose can vary by pen.
+    Use this only as a record-keeping aid for a plan you've agreed with your prescriber or pharmacist.
+  </p>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "zepboundClickTracker.v1";
+  var DOSE_STEPS = [2.5, 3.75, 5, 6.25, 7.5];
+  var PEN_STRENGTHS = [2.5, 5, 7.5, 10, 12.5, 15];
+  var DEFAULT_SETTINGS = {
+    clicksPerDose: 60,
+    dosesPerPen: 4,
+    extraClicks: 0,
+    primeClicks: 0,
+    lastDose: 2.5
+  };
+
+  // ---------- storage ----------
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  function today() {
+    var d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 10);
+  }
+  function newPen(strength) {
+    return { id: uid(), strength: strength, opened: today(), doses: [] };
+  }
+  function freshState() {
+    var pen = newPen(15);
+    return { settings: Object.assign({}, DEFAULT_SETTINGS), pens: [pen], currentPenId: pen.id };
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return freshState();
+      var s = JSON.parse(raw);
+      if (!s || !Array.isArray(s.pens) || !s.pens.length) return freshState();
+      s.settings = Object.assign({}, DEFAULT_SETTINGS, s.settings || {});
+      if (!s.pens.some(function (p) { return p.id === s.currentPenId; })) {
+        s.currentPenId = s.pens[s.pens.length - 1].id;
+      }
+      return s;
+    } catch (e) {
+      return freshState();
+    }
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ }
+  }
+
+  var state = load();
+
+  // ---------- math ----------
+  function currentPen() {
+    return state.pens.find(function (p) { return p.id === state.currentPenId; });
+  }
+  function totalClicks() {
+    var s = state.settings;
+    return s.clicksPerDose * s.dosesPerPen + s.extraClicks;
+  }
+  function mgPerClick(pen) {
+    return pen.strength / state.settings.clicksPerDose;
+  }
+  function clicksFor(mg, pen) {
+    return mg / mgPerClick(pen);
+  }
+  function usedClicks(pen) {
+    return pen.doses.reduce(function (sum, d) { return sum + d.clicks + (d.prime || 0); }, 0);
+  }
+  function remainingClicks(pen) {
+    return Math.max(0, totalClicks() - usedClicks(pen));
+  }
+  function fmtMg(mg) {
+    var r = Math.round(mg * 100) / 100;
+    return r.toString();
+  }
+  function fmtDate(iso) {
+    var parts = iso.split("-");
+    var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+  }
+  function addDays(iso, n) {
+    var parts = iso.split("-");
+    var d = new Date(+parts[0], +parts[1] - 1, +parts[2] + n);
+    var mm = String(d.getMonth() + 1).padStart(2, "0");
+    var dd = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + mm + "-" + dd;
+  }
+
+  // ---------- elements ----------
+  var $ = function (id) { return document.getElementById(id); };
+  var el = {
+    penTitle: $("penTitle"), remainingMg: $("remainingMg"), remainingClicks: $("remainingClicks"),
+    dosesTaken: $("dosesTaken"), penBar: $("penBar"), penMeta: $("penMeta"),
+    doseSelect: $("doseSelect"), customClicksWrap: $("customClicksWrap"), customClicks: $("customClicks"),
+    doseDate: $("doseDate"), dialBox: $("dialBox"), dialClicks: $("dialClicks"), dialDetail: $("dialDetail"),
+    doseNote: $("doseNote"), logBtn: $("logBtn"),
+    tabCurrent: $("tabCurrent"), tabFresh: $("tabFresh"), stepTable: $("stepTable"), stepNote: $("stepNote"),
+    logList: $("logList"), logEmpty: $("logEmpty"), nextDue: $("nextDue"),
+    pastPens: $("pastPens"), pastPensList: $("pastPensList"),
+    setStrength: $("setStrength"), setClicksPerDose: $("setClicksPerDose"), setDosesPerPen: $("setDosesPerPen"),
+    setExtraClicks: $("setExtraClicks"), setPrimeClicks: $("setPrimeClicks")
+  };
+
+  var tableMode = "current";
+
+  // ---------- setup ----------
+  DOSE_STEPS.forEach(function (mg) {
+    var o = document.createElement("option");
+    o.value = String(mg);
+    o.textContent = fmtMg(mg) + " mg";
+    el.doseSelect.appendChild(o);
+  });
+  var customOpt = document.createElement("option");
+  customOpt.value = "custom";
+  customOpt.textContent = "Custom clicks…";
+  el.doseSelect.appendChild(customOpt);
+
+  PEN_STRENGTHS.forEach(function (mg) {
+    var o = document.createElement("option");
+    o.value = String(mg);
+    o.textContent = fmtMg(mg) + " mg pen";
+    el.setStrength.appendChild(o);
+  });
+
+  el.doseSelect.value = String(state.settings.lastDose);
+  if (!el.doseSelect.value) el.doseSelect.value = "2.5";
+  el.doseDate.value = today();
+
+  // ---------- rendering ----------
+  function selectedDose(pen) {
+    var prime = state.settings.primeClicks;
+    if (el.doseSelect.value === "custom") {
+      var c = Math.max(1, Math.round(+el.customClicks.value || 0));
+      return { clicks: c, prime: prime, mg: c * mgPerClick(pen), exact: true, custom: true };
+    }
+    var mg = +el.doseSelect.value;
+    var raw = clicksFor(mg, pen);
+    var clicks = Math.round(raw);
+    return { clicks: clicks, prime: prime, mg: mg, exact: Math.abs(raw - clicks) < 1e-6, custom: false };
+  }
+
+  function renderPen() {
+    var pen = currentPen();
+    var total = totalClicks();
+    var left = remainingClicks(pen);
+    var mpc = mgPerClick(pen);
+    el.penTitle.textContent = fmtMg(pen.strength) + " mg pen";
+    el.remainingMg.textContent = fmtMg(left * mpc);
+    el.remainingClicks.textContent = left;
+    el.dosesTaken.textContent = pen.doses.length;
+    el.penBar.style.width = (total ? (left / total) * 100 : 0) + "%";
+    el.penMeta.textContent = "Opened " + fmtDate(pen.opened) + " · " + total + " clicks total · " +
+      fmtMg(mpc) + " mg per click";
+  }
+
+  function renderDial() {
+    var pen = currentPen();
+    var d = selectedDose(pen);
+    var left = remainingClicks(pen);
+    var need = d.clicks + d.prime;
+    el.customClicksWrap.classList.toggle("hidden", !d.custom);
+    el.dialClicks.textContent = d.clicks + " clicks";
+    var detail = d.custom ? "≈ " + fmtMg(d.mg) + " mg" : fmtMg(d.mg) + " mg";
+    if (d.prime) detail += " · plus " + d.prime + " priming clicks first";
+    if (!d.exact) detail += " · rounded, actual ≈ " + fmtMg(d.clicks * mgPerClick(pen)) + " mg";
+    var ok = need <= left;
+    if (!ok) detail = "Not enough left: need " + need + ", have " + left + " clicks";
+    el.dialDetail.textContent = detail;
+    el.dialBox.classList.toggle("bad", !ok);
+    el.logBtn.disabled = !ok;
+  }
+
+  function renderSteps() {
+    var pen = currentPen();
+    var mpc = mgPerClick(pen);
+    var prime = state.settings.primeClicks;
+    var avail = tableMode === "current" ? remainingClicks(pen) : totalClicks();
+    var current = String(state.settings.lastDose);
+    var smallestClicks = Math.round(clicksFor(DOSE_STEPS[0], pen)) + prime;
+    var anyRounded = false;
+
+    el.tabCurrent.setAttribute("aria-pressed", String(tableMode === "current"));
+    el.tabFresh.setAttribute("aria-pressed", String(tableMode === "fresh"));
+    el.stepTable.innerHTML = "";
+
+    DOSE_STEPS.forEach(function (mg) {
+      var raw = clicksFor(mg, pen);
+      var clicks = Math.round(raw);
+      if (Math.abs(raw - clicks) > 1e-6) anyRounded = true;
+      var per = clicks + prime;
+      var n = per > 0 ? Math.floor(avail / per) : 0;
+      var rem = avail - n * per;
+      var remMg = rem * mpc;
+
+      var tr = document.createElement("tr");
+      if (String(mg) === current) tr.className = "current";
+
+      var leftover;
+      if (rem === 0) {
+        leftover = '<span class="badge ok">None — uses it all</span>';
+      } else {
+        var extra = "";
+        if (mg !== DOSE_STEPS[0] && rem >= smallestClicks) {
+          // Name the largest step the remainder still covers, so it isn't wasted.
+          var fits = DOSE_STEPS.filter(function (s) { return Math.round(clicksFor(s, pen)) + prime <= rem; });
+          extra = '<div class="small muted">Enough for one ' + fmtMg(fits[fits.length - 1]) + ' mg dose</div>';
+        }
+        leftover = '<span class="badge ' + (extra ? "warn" : "danger") + '">' +
+          fmtMg(remMg) + " mg (" + rem + " clicks) " + (extra ? "left" : "discarded") + "</span>" + extra;
+      }
+
+      tr.innerHTML =
+        "<td style=\"white-space:nowrap\"><b>" + fmtMg(mg) + " mg</b></td>" +
+        '<td class="num">' + clicks + (prime ? '<div class="small muted">+' + prime + " prime</div>" : "") + "</td>" +
+        '<td class="num"><b>' + n + "</b></td>" +
+        "<td>" + leftover + "</td>";
+      el.stepTable.appendChild(tr);
+    });
+
+    var note = tableMode === "current"
+      ? "Based on the " + avail + " clicks left in this pen."
+      : "For a new " + fmtMg(pen.strength) + " mg pen with " + avail + " clicks.";
+    note += " Your most recent dose is highlighted.";
+    if (anyRounded) note += " Some doses don't land on a whole click at this pen strength, so they're rounded.";
+    el.stepNote.textContent = note;
+  }
+
+  function doseLine(d, pen) {
+    var mg = d.mg != null ? d.mg : d.clicks * mgPerClick(pen);
+    var text = "<div><b>" + fmtMg(mg) + " mg</b> <span class=\"muted small\">· " + d.clicks + " clicks" +
+      (d.prime ? " + " + d.prime + " prime" : "") + "</span>" +
+      '<div class="small muted">' + fmtDate(d.date) + (d.note ? " · " + escapeHtml(d.note) : "") + "</div></div>";
+    return text;
+  }
+
+  function renderLog() {
+    var pen = currentPen();
+    var doses = pen.doses.slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    el.logList.innerHTML = "";
+    doses.forEach(function (d) {
+      var li = document.createElement("li");
+      li.innerHTML = doseLine(d, pen);
+      var del = document.createElement("button");
+      del.className = "ghost";
+      del.type = "button";
+      del.textContent = "Remove";
+      del.setAttribute("aria-label", "Remove dose from " + d.date);
+      del.addEventListener("click", function () {
+        if (!confirm("Remove this dose entry?")) return;
+        pen.doses = pen.doses.filter(function (x) { return x.id !== d.id; });
+        save();
+        render();
+      });
+      li.appendChild(del);
+      el.logList.appendChild(li);
+    });
+    el.logEmpty.classList.toggle("hidden", doses.length > 0);
+
+    var latest = latestDose();
+    el.nextDue.textContent = latest ? "Next due " + fmtDate(addDays(latest.date, 7)) : "";
+
+    var past = state.pens.filter(function (p) { return p.id !== state.currentPenId; });
+    el.pastPens.classList.toggle("hidden", past.length === 0);
+    el.pastPensList.innerHTML = "";
+    past.slice().reverse().forEach(function (p) {
+      var wrap = document.createElement("div");
+      wrap.style.marginTop = "10px";
+      var used = usedClicks(p);
+      var head = document.createElement("div");
+      head.className = "small";
+      head.innerHTML = "<b>" + fmtMg(p.strength) + " mg pen</b> · opened " + fmtDate(p.opened) +
+        " · " + p.doses.length + " doses · " + used + " clicks used";
+      wrap.appendChild(head);
+      var ul = document.createElement("ul");
+      ul.className = "log";
+      p.doses.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (d) {
+        var li = document.createElement("li");
+        li.innerHTML = doseLine(d, p);
+        ul.appendChild(li);
+      });
+      wrap.appendChild(ul);
+      el.pastPensList.appendChild(wrap);
+    });
+  }
+
+  function latestDose() {
+    var all = [];
+    state.pens.forEach(function (p) { all = all.concat(p.doses); });
+    all.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    return all[0];
+  }
+
+  function renderSettings() {
+    var pen = currentPen();
+    var s = state.settings;
+    el.setStrength.value = String(pen.strength);
+    el.setClicksPerDose.value = s.clicksPerDose;
+    el.setDosesPerPen.value = s.dosesPerPen;
+    el.setExtraClicks.value = s.extraClicks;
+    el.setPrimeClicks.value = s.primeClicks;
+  }
+
+  function render() {
+    renderPen();
+    renderDial();
+    renderSteps();
+    renderLog();
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // ---------- events ----------
+  el.doseSelect.addEventListener("change", function () {
+    if (el.doseSelect.value !== "custom") {
+      state.settings.lastDose = +el.doseSelect.value;
+      save();
+    }
+    render();
+  });
+  el.customClicks.addEventListener("input", renderDial);
+
+  el.logBtn.addEventListener("click", function () {
+    var pen = currentPen();
+    var d = selectedDose(pen);
+    if (d.clicks + d.prime > remainingClicks(pen)) return;
+    pen.doses.push({
+      id: uid(),
+      date: el.doseDate.value || today(),
+      mg: d.custom ? null : d.mg,
+      clicks: d.clicks,
+      prime: d.prime,
+      note: el.doseNote.value.trim()
+    });
+    el.doseNote.value = "";
+    save();
+    render();
+  });
+
+  el.tabCurrent.addEventListener("click", function () { tableMode = "current"; renderSteps(); });
+  el.tabFresh.addEventListener("click", function () { tableMode = "fresh"; renderSteps(); });
+
+  $("newPenBtn").addEventListener("click", function () {
+    var pen = currentPen();
+    var left = remainingClicks(pen);
+    var msg = "Start a new " + fmtMg(pen.strength) + " mg pen?";
+    if (left > 0 && pen.doses.length) {
+      msg += "\n\nThe current pen's " + left + " remaining clicks (" + fmtMg(left * mgPerClick(pen)) +
+        " mg) will be recorded as discarded.";
+    }
+    if (!confirm(msg)) return;
+    if (!pen.doses.length) {
+      // Nothing logged on this pen; just reset its opened date.
+      pen.opened = today();
+    } else {
+      pen.discardedClicks = left;
+      var p = newPen(pen.strength);
+      state.pens.push(p);
+      state.currentPenId = p.id;
+    }
+    tableMode = "current";
+    save();
+    render();
+  });
+
+  function intSetting(input, key, min) {
+    input.addEventListener("change", function () {
+      var v = Math.round(+input.value);
+      if (!isFinite(v) || v < min) v = DEFAULT_SETTINGS[key];
+      state.settings[key] = v;
+      input.value = v;
+      save();
+      render();
+    });
+  }
+  intSetting(el.setClicksPerDose, "clicksPerDose", 1);
+  intSetting(el.setDosesPerPen, "dosesPerPen", 1);
+  intSetting(el.setExtraClicks, "extraClicks", 0);
+  intSetting(el.setPrimeClicks, "primeClicks", 0);
+  el.setStrength.addEventListener("change", function () {
+    currentPen().strength = +el.setStrength.value;
+    save();
+    render();
+  });
+
+  $("exportBtn").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "pen-click-tracker-" + today() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  $("importBtn").addEventListener("click", function () { $("importFile").click(); });
+  $("importFile").addEventListener("change", function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var s = JSON.parse(reader.result);
+        if (!s || !Array.isArray(s.pens) || !s.pens.length) throw new Error("bad");
+        if (!confirm("Replace all current data with this backup?")) return;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+        state = load();
+        renderSettings();
+        render();
+      } catch (err) {
+        alert("That file doesn't look like a Pen Click Tracker backup.");
+      }
+      e.target.value = "";
+    };
+    reader.readAsText(file);
+  });
+  $("resetBtn").addEventListener("click", function () {
+    if (!confirm("Erase all pens, doses and settings? This can't be undone.")) return;
+    state = freshState();
+    save();
+    renderSettings();
+    render();
+  });
+
+  renderSettings();
+  render();
+})();
+</script>
+</body>
+</html>
